@@ -26,6 +26,20 @@ class _MyAppState extends State<MyApp> {
         child: Center(
           child: Column(
             children: [
+
+              // ------ Uncomment this kung may if-else statement na sa notes display -----
+              // Container(
+              //   margin: EdgeInsets.symmetric(vertical: 200),
+              //   child: Column(
+              //     children: [
+              //       Image.network('https://pat270.github.io/clay3-test-site/vclay-table-dd/images/images/search_state.gif'),
+              //       SizedBox(height:30),
+              //       Text("No Notes Yet. Click \"+\" to Create."),
+              //     ],
+              //   ),
+              // ),
+
+              
               Container(
                 color: Color(0xFFFFFFFF),
                 child: TextField(
