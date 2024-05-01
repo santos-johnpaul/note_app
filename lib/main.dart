@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'create.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -21,6 +22,7 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: Color(0xFFFFFFFF),
         centerTitle: true,
         title: Text('App Name'),
+        automaticallyImplyLeading: false
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -108,7 +110,10 @@ class _MyAppState extends State<MyApp> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Add your action here
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateNote()),
+          );
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.white,
