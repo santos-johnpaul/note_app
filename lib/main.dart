@@ -1,5 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'create.dart';
+import 'package:http/http.dart' as http;
+import 'dart:async';
 
 void main() {
   runApp(MaterialApp(
@@ -14,6 +17,39 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  TextEditingController _title = TextEditingController();
+  TextEditingController _content = TextEditingController();
+  TextEditingController _dateTime = TextEditingController();
+  final server = "http://localhost/note";
+  List<dynamic> notes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Future<void> loadData() async {
+    final url = Uri.parse("$server/notes_json.php");
+    try {
+      final response = await http.get(url);
+      print("Response status code: ${response.statusCode}");
+      print("Response body: ${response.body}");
+      if (response.statusCode == 200) {
+        setState(() {
+          notes = jsonDecode(response.body);
+        });
+      } else {
+        // Handle error responses
+        print("Failed to load notes: ${response.statusCode}");
+      }
+    } catch (e) {
+      // Handle network errors
+      print("Error loading notes: $e");
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,26 +58,12 @@ class _MyAppState extends State<MyApp> {
         backgroundColor: Color(0xFFFFFFFF),
         centerTitle: true,
         title: Text('App Name'),
-        automaticallyImplyLeading: false
+        automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-
-              // ------ Uncomment this kung may if-else statement na sa notes display -----
-              // Container(
-              //   margin: EdgeInsets.symmetric(vertical: 200),
-              //   child: Column(
-              //     children: [
-              //       Image.network('https://pat270.github.io/clay3-test-site/vclay-table-dd/images/images/search_state.gif'),
-              //       SizedBox(height:30),
-              //       Text("No Notes Yet. Click \"+\" to Create."),
-              //     ],
-              //   ),
-              // ),
-
-              
               Container(
                 color: Color(0xFFFFFFFF),
                 child: TextField(
@@ -55,65 +77,49 @@ class _MyAppState extends State<MyApp> {
                   },
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Color(0xFFFFFFFF),
-                  border: Border.all(color: Colors.black, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                width: double.maxFinite,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'title',
-                      style: TextStyle(fontSize: 20),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: notes.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    margin: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Color(0xFFFFFFFF),
+                      border: Border.all(color: Colors.black, width: 1.0),
+                      borderRadius: BorderRadius.circular(8.0),
                     ),
-                    Text('desc'),
-                    Text(
-                      '10/10/24  11:11pm',
-                      style: TextStyle(color: Color(0xff4b4b4b)),
+                    width: double.maxFinite,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          notes[index]['title'],
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        Text(notes[index]['content']),
+                        Text(
+                          notes[index]['dateTime'],
+                          style: TextStyle(color: Color(0xff4b4b4b)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                margin: EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Color(0xFFFFFFFF),
-                  border: Border.all(color: Colors.black, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                width: double.maxFinite,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'title',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                    Text('desc'),
-                    Text(
-                      '10/10/24  11:11pm',
-                      style: TextStyle(color: Color(0xff4b4b4b)),
-                    ),
-                  ],
-                ),
-              ),
-
             ],
           ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => CreateNote()),
           );
+          // After adding a new note, reload the data
+          loadData();
         },
         child: Icon(Icons.add),
         backgroundColor: Colors.white,
